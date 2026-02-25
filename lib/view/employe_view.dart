@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:zylutask/controller/employe_controller.dart';
 
 class EmployeeView extends StatefulWidget {
-  EmployeeView({super.key});
+  const EmployeeView({super.key});
 
   @override
   State<EmployeeView> createState() => _EmployeeViewState();
@@ -16,9 +16,6 @@ class _EmployeeViewState extends State<EmployeeView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
       appBar: AppBar(
@@ -63,7 +60,7 @@ class _EmployeeViewState extends State<EmployeeView> {
           // ── Search Bar ──────────────────────────────────────────────
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               controller: searchController,
               onChanged: controller.updateSearch,
@@ -117,8 +114,13 @@ class _EmployeeViewState extends State<EmployeeView> {
 
           // ── Filter Chips ────────────────────────────────────────────
           Container(
-            color: Colors.white,
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+            // color: Colors.white,
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: 12,
+              top: 12,
+            ),
             child: Obx(
               () => SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -160,53 +162,75 @@ class _EmployeeViewState extends State<EmployeeView> {
 
           // ── Employee List ────────────────────────────────────────────
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF5B6AF0)),
-                );
-              }
+            child: RefreshIndicator(
+              onRefresh: () async {
+                controller.fetchEmployees();
+              },
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF5B6AF0)),
+                  );
+                }
 
-              final employees = controller.filteredEmployees;
+                final employees = controller.filteredEmployees;
 
-              if (employees.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.person_search_rounded,
-                        size: 56,
-                        color: Colors.grey[300],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "No employees found",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
+                if (employees.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.person_search_rounded,
+                          size: 56,
+                          color: Colors.grey[300],
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Try adjusting your search or filters",
-                        style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                        const SizedBox(height: 16),
+                        Text(
+                          "No employees found",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        InkWell(
+                          onTap: () => controller.retry(),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF5B6AF0),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "Retry",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-              return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                itemCount: employees.length,
-                itemBuilder: (context, index) {
-                  final emp = employees[index];
-                  return _EmployeeCard(emp: emp);
-                },
-              );
-            }),
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  itemCount: employees.length,
+                  itemBuilder: (context, index) {
+                    final emp = employees[index];
+                    return _EmployeeCard(emp: emp);
+                  },
+                );
+              }),
+            ),
           ),
         ],
       ),

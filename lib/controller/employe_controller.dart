@@ -4,26 +4,67 @@ import 'package:http/http.dart' as http;
 import 'package:zylutask/model/employe_model.dart';
 
 class EmployeeController extends GetxController {
-  // ── State ────────────────────────────────────────────────────────────────────
+  // ── State
   final RxList<Employee> employees = <Employee>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool hasError = false.obs;
   final RxString errorMessage = ''.obs;
 
-  // ── Search & Filter ──────────────────────────────────────────────────────────
+  // ── Search & Filter
   final RxString searchQuery = ''.obs;
   final RxString activeFilter = 'all'.obs;
 
   static const String _baseUrl = "http://127.0.0.1:8000/api/employees";
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────────
   @override
   void onInit() {
     super.onInit();
     fetchEmployees();
   }
 
-  // ── Computed ─────────────────────────────────────────────────────────────────
+  List<Employee> dummyData = [
+    Employee.fromJson({
+      "id": 1,
+      "name": "Ravi Kumar",
+      "joining_date": "2017-01-10T00:00:00.000000Z",
+      "is_active": true,
+      "years": 9.124847135959348,
+      "is_senior_active": true,
+    }),
+    Employee.fromJson({
+      "id": 2,
+      "name": "Priya Sharma",
+      "joining_date": "2023-05-15T00:00:00.000000Z",
+      "is_active": true,
+      "years": 2.7823813825980785,
+      "is_senior_active": false,
+    }),
+    Employee.fromJson({
+      "id": 3,
+      "name": "Arjun Reddy",
+      "joining_date": "2015-03-20T00:00:00.000000Z",
+      "is_active": false,
+      "years": 10.935806040143486,
+      "is_senior_active": false,
+    }),
+    Employee.fromJson({
+      "id": 4,
+      "name": "Sneha Patel",
+      "joining_date": "2018-08-12T00:00:00.000000Z",
+      "is_active": true,
+      "years": 7.5385457661888955,
+      "is_senior_active": true,
+    }),
+    Employee.fromJson({
+      "id": 5,
+      "name": "Rahul Verma",
+      "joining_date": "2010-11-25T00:00:00.000000Z",
+      "is_active": true,
+      "years": 15.25087453332344,
+      "is_senior_active": true,
+    }),
+  ];
+
   List<Employee> get filteredEmployees {
     var list = employees.toList();
 
@@ -69,9 +110,11 @@ class EmployeeController extends GetxController {
         _setError(
           "Server error ${response.statusCode}: ${_statusMessage(response.statusCode)}",
         );
+        employees.value = dummyData;
       }
     } on Exception catch (e) {
       _setError(_friendlyError(e));
+      employees.value = dummyData;
     } finally {
       isLoading(false);
     }
